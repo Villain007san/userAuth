@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const admin = require('firebase-admin'); // Ensure you have Firebase Admin SDK set up
-const User = require('./models/User');
+const User = require('./models/user');
 
 const app = express();
 const PORT = process.env.PORT || 8800;
