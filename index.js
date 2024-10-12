@@ -18,6 +18,15 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' directory
 
+// home page 
+app.get('/', (req, res) => {
+    console.log('Serving index.html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.get('*', (req, res) => {
+    res.status(404).send('Page not found');
+});
+
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB Atlas'))
