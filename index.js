@@ -29,7 +29,6 @@ app.get('*', (req, res) => {
 
 // MongoDB Atlas connection
 mongoose.connect(process.env.MONGODB_URI, {
-    bufferCommands: false,  // Prevent buffering when the connection is down
     serverSelectionTimeoutMS: 20000 // Increase timeout to 20 seconds
 })
     .then(() => console.log('Connected to MongoDB Atlas'))
