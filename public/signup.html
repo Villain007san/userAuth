@@ -3,124 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #6D83F2, #A692F2);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            background-color: white;
-            width: 350px;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        input:focus {
-            border-color: #6D83F2;
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            background-color: #6D83F2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #5a72db;
-        }
-
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .success {
-            color: green;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
-    </style>
+    <title>Signup - Kasba Shopping App</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Sign Up</h2>
-        <form id="signupForm">
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Sign Up</button>
-            <p class="error" id="errorMsg"></p>
-            <p class="success" id="successMsg"></p>
-        </form>
-    </div>
+    <h1>Signup - Kasba Shopping App</h1>
+    <form id="signupForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required><br><br>
+
+        <label for="email">Email (optional):</label>
+        <input type="email" id="email"><br><br>
+
+        <label for="phone">Phone Number (with country code):</label>
+        <input type="tel" id="phone" required><br><br>
+
+        <button type="button" id="getOtpBtn">Get OTP</button><br><br>
+
+        <label for="otp" id="otpLabel" style="display:none;">Enter OTP:</label>
+        <input type="text" id="otp" required style="display:none;"><br><br>
+
+        <button type="button" id="verifyOtpBtn" style="display:none;">Verify OTP</button>
+    </form>
 
     <script>
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Function to send OTP
+            async function sendOTP() {
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const phoneNumber = document.getElementById('phone').value;
 
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+                if (!name || !phoneNumber) {
+                    alert('Name and phone number are required.');
+                    return;
+                }
 
-            const response = await fetch('http://localhost:8800/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password }),
-            });
+                try {
+                    const response = await fetch('/api/send-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, email, phoneNumber })
+                    });
 
-            const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
-            errorMsg.innerText = '';
-            successMsg.innerText = '';
+                    const data = await response.json();
 
-            const data = await response.json();
+                    if (response.ok) {
+                        alert('OTP sent successfully!');
+                        document.getElementById('otpLabel').style.display = 'block'; // Show OTP label
+                        document.getElementById('otp').style.display = 'block'; // Show OTP input field
+                        document.getElementById('verifyOtpBtn').style.display = 'block'; // Show verify button
+                    } else {
+                        alert(data.msg || 'Failed to send OTP');
+                    }
 
-            if (response.ok) {
-                successMsg.innerText = 'Signup successful! Token: ' + data.token;
-            } else {
-                errorMsg.innerText = data.msg || 'An error occurred.';
+                } catch (error) {
+                    console.error('Error sending OTP:', error);
+                    alert('Failed to send OTP. Please check your connection.');
+                }
             }
+
+            // Function to verify OTP
+            async function verifyOTP() {
+                const phoneNumber = document.getElementById('phone').value;
+                const otp = document.getElementById('otp').value;
+                const password = prompt("Please enter your desired password:");
+
+                if (!phoneNumber || !otp || !password) {
+                    alert('Phone number, OTP, and password are required.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/verify-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ phoneNumber, otp, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(data.msg || 'OTP verified successfully!');
+                        // Redirect to the login page after successful signup
+                        window.location.href = '/login.html';
+                    } else {
+                        alert(data.msg || 'Failed to verify OTP');
+                    }
+
+                } catch (error) {
+                    console.error('Error verifying OTP:', error);
+                    alert('Failed to verify OTP. Please check your connection.');
+                }
+            }
+
+            // Attach event listeners to buttons after DOM is loaded
+            document.getElementById('getOtpBtn').addEventListener('click', sendOTP);
+            document.getElementById('verifyOtpBtn').addEventListener('click', verifyOTP);
         });
     </script>
 </body>
